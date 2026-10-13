@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 選択</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<button id="backBtn" class="back-btn" onclick="goBack()">← 戻る</button>
+
+<div class="card">
+  <h2 id="partTitle">Part</h2>
+
+  <div id="weekList">
+
+    <!-- Week 1 -->
+    <div class="weekItem">
+      <div class="weekHeader">
+        <span>Week 1</span>
+        <span class="progressText">0%</span>
+      </div>
+      <div class="fusenCount">単語数：0個</div>
+      <div class="progressBar"><div class="progressFill"></div></div>
+      <button class="weekBtn" data-week="1">開始する</button>
+    </div>
+
+    <!-- Week 2 -->
+    <div class="weekItem">
+      <div class="weekHeader">
+        <span>第２課</span>
+        <span class="progressText">0%</span>
+      </div>
+      <div class="fusenCount">単語数：0個</div>
+      <div class="progressBar"><div class="progressFill"></div></div>
+      <button class="weekBtn" data-week="2">開始する</button>
+    </div>
+
+    <!-- Week 3 -->
+    <div class="weekItem">
+      <div class="weekHeader">
+        <span>第３課</span>
+        <span class="progressText">0%</span>
+      </div>
+      <div class="fusenCount">単語数：0個</div>
+      <div class="progressBar"><div class="progressFill"></div></div>
+      <button class="weekBtn" data-week="3">開始する</button>
+    </div>
+
+    <!-- Week 4 -->
+    <div class="weekItem">
+      <div class="weekHeader">
+        <span>第4課</span>
+        <span class="progressText">0%</span>
+      </div>
+      <div class="fusenCount">単語数：0個</div>
+      <div class="progressBar"><div class="progressFill"></div></div>
+      <button class="weekBtn" data-week="4">開始する</button>
+    </div>
+
+    <!-- Week 5 -->
+    <div class="weekItem">
+      <div class="weekHeader">
+        <span>第5課</span>
+        <span class="progressText">0%</span>
+      </div>
+      <div class="fusenCount">単語数：0個</div>
+      <div class="progressBar"><div class="progressFill"></div></div>
+      <button class="weekBtn" data-week="5">開始する</button>
+    </div>
+
+    <!-- Week 6 -->
+    <div class="weekItem">
+      <div class="weekHeader">
+        <span>第6課</span>
+        <span class="progressText">0%</span>
+      </div>
+      <div class="fusenCount">単語数：0個</div>
+      <div class="progressBar"><div class="progressFill"></div></div>
+      <button class="weekBtn" data-week="6">開始する</button>
+    </div>
+
+    <!-- Week 7 -->
+    <div class="weekItem">
+      <div class="weekHeader">
+        <span>第7課</span>
+        <span class="progressText">0%</span>
+      </div>
+      <div class="fusenCount">単語数：0個</div>
+      <div class="progressBar"><div class="progressFill"></div></div>
+      <button class="weekBtn" data-week="7">開始する</button>
+    </div>
+
+<!-- Week 8 -->
+    <div class="weekItem">
+      <div class="weekHeader">
+        <span>第8課</span>
+        <span class="progressText">0%</span>
+      </div>
+      <div class="fusenCount">単語数：0個</div>
+      <div class="progressBar"><div class="progressFill"></div></div>
+      <button class="weekBtn" data-week="8">開始する</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ★ app.js を先に読み込む（partWords を使うため） -->
+<script src="app.js"></script>
+
+<!-- ★ 復習モード対応の進捗＆付箋数表示 -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const params = new URLSearchParams(window.location.search);
+  const part = Number(params.get("part"));
+  const isReview = params.get("review") === "1";
+
+  const wordStatus = JSON.parse(localStorage.getItem("wordStatus") || "{}");
+  const wrongList = JSON.parse(localStorage.getItem("wrongWords") || "[]");
+
+  for (let i = 1; i <= 8; i++) {
+
+    // ★ PartごとのWeek単語セット
+    let words = partWords[part][i];
+
+    // ★復習モードなら付箋単語だけに絞る
+    let reviewWords = isReview
+      ? words.filter(w => wrongList.includes(w.en))
+      : words;
+
+    // ★付箋数を表示
+    const fusenLabel = document.querySelector(`.weekItem:nth-child(${i}) .fusenCount`);
+    fusenLabel.textContent = `単語数：${reviewWords.length}個`;
+
+    // ★単語が0なら 0% のまま
+    if (reviewWords.length === 0) {
+      const label = document.querySelector(`.weekItem:nth-child(${i}) .progressText`);
+      const bar = document.querySelector(`.weekItem:nth-child(${i}) .progressFill`);
+      label.textContent = "0%";
+      bar.style.width = "0%";
+      continue;
+    }
+
+    // ★正答率計算
+    let correct = 0;
+    reviewWords.forEach(w => {
+      if (wordStatus[w.en] === true) correct++;
+    });
+
+    const rate = Math.round((correct / reviewWords.length) * 100);
+
+    const label = document.querySelector(`.weekItem:nth-child(${i}) .progressText`);
+    label.textContent = `${rate}%`;
+
+    const bar = document.querySelector(`.weekItem:nth-child(${i}) .progressFill`);
+    bar.style.width = `${rate}%`;
+  }
+});
+</script>
+
+<!-- ★ Weekボタンの挙動（Part5のときだけ付箋単語をセット） -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const params = new URLSearchParams(window.location.search);
+  const part = Number(params.get("part"));
+  const isReview = params.get("review") === "1";
+
+  const weekButtons = document.querySelectorAll('.weekBtn');
+
+  weekButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const week = Number(btn.dataset.week);
+
+      // ★ Part5（復習モード）のときだけ付箋単語をセット
+      if (part === 5 && isReview) {
+        const wrongList = JSON.parse(localStorage.getItem("wrongWords") || "[]");
+        const filtered = partWords[part][week].filter(w => wrongList.includes(w.en));
+
+        localStorage.setItem("reviewWords", JSON.stringify(filtered));
+
+        window.location.href = `index.html?part=${part}&week=${week}&review=1`;
+        return;
+      }
+
+      // ★ 通常モード（PartごとのWeek単語セット）
+      window.location.href = `index.html?part=${part}&week=${week}`;
+    });
+  });
+});
+</script>
+
+</body>
+</html>

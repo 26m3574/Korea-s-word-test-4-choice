@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- iPhone ホーム画面追加対応 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <title>韓国語4択クイズ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<button id="backBtn" class="back-btn" onclick="goBack()">← 戻る</button>
+
+<!-- パート選択画面 -->
+<div id="partArea" class="card">
+  <h2>パートを選択</h2>
+
+  <button class="partBtn" data-part="1">第一章:単語</button>
+  <button class="partBtn" data-part="2">第二章:挨拶</button>
+  <button class="partBtn" data-part="3">第三章:文法</button>
+  <button class="partBtn" data-part="4">第四章:</button>
+  <button class="partBtn" data-part="5">付箋付き単語のみ</button>
+</div>
+
+<!-- スタート画面 -->
+<div id="settingsArea" class="card" style="display:none;">
+  <h2>韓国単語4択クイズ</h2>
+
+  <label>出題モード</label>
+  <select id="mode">
+    <option value="en_to_jp">韓国 → 日本語</option>
+    <option value="jp_to_en">日本語 → 韓国</option>
+  </select>
+
+  <label>問題数</label>
+  <input type="number" id="questionCount" value="10" min="1" max="100">
+
+  <label>時間制限（秒）</label>
+  <input type="number" id="timeLimit" value="10" min="3" max="60">
+
+  <button class="start-btn" onclick="startQuiz()">スタート</button>
+</div>
+
+<!-- 進行状況 -->
+<div id="progressArea" class="info" style="display:none;">
+  <span id="timer">残り時間: 0秒</span>
+  <span id="nowNum">0</span> / <span id="totalNum">0</span>
+</div>
+
+<!-- 問題画面 -->
+<div id="quizArea" class="card" style="display:none;">
+  <h3 id="questionTitle">問題</h3>
+  <div id="question" class="question-text"></div>
+  <div id="choices"></div>
+
+  <div id="judge"></div>
+
+  <button id="nextBtn" class="next-btn" style="display:none;" onclick="goNext()">次へ</button>
+</div>
+
+<!-- 結果画面 -->
+<div id="resultArea" class="card" style="display:none;"></div>
+
+
+<!-- ★ Partごとの単語セット読み込みに対応 -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const params = new URLSearchParams(window.location.search);
+  selectedWeek = Number(params.get("week"));
+  selectedPart = Number(params.get("part"));
+  const isReview = params.get("review") === "1";
+
+  if (selectedWeek) {
+
+    words.length = 0;
+
+    if (isReview) {
+      // ★復習モード：付箋単語だけ読み込む
+      const reviewWords = JSON.parse(localStorage.getItem("reviewWords") || "[]");
+      reviewWords.forEach(w => words.push(w));
+
+    } else {
+      // ★通常モード：Partごとの Week 単語セットを読み込む
+      partWords[selectedPart][selectedWeek].forEach(w => words.push(w));
+    }
+
+    // 問題数の最大値をセット
+    document.getElementById("questionCount").max = words.length;
+
+    // パート選択画面を非表示、スタート画面を表示
+    document.getElementById("partArea").style.display = "none";
+    document.getElementById("settingsArea").style.display = "block";
+  }
+});
+</script>
+
+<script src="app.js"></script>
+</body>
+</html>

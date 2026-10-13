@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Part2 - Week選択</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<button id="backBtn" class="back-btn" onclick="goBack()">← 戻る</button>
+
+<div class="card">
+  <h2>第二章：挨拶（Part2）</h2>
+
+  <div id="weekList">
+
+    <!-- Week 1 -->
+    <div class="weekItem">
+      <div class="weekHeader">
+        <span>Week 1</span>
+        <span class="progressText">0%</span>
+      </div>
+      <div class="fusenCount">単語数：0個</div>
+      <div class="progressBar"><div class="progressFill"></div></div>
+      <button class="weekBtn" data-week="1">開始する</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="app.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const weekButtons = document.querySelectorAll('.weekBtn');
+
+  weekButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const week = Number(btn.dataset.week);
+      window.location.href = `index.html?part=2&week=${week}`;
+    });
+  });
+});
+</script>
+
+</body>
+</html>

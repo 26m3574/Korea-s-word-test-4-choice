@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文法（Part3）Week 選択</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<button id="backBtn" class="back-btn" onclick="goBack()">← 戻る</button>
+
+<div class="card">
+  <h2 id="partTitle">Part 3（文法）</h2>
+
+  <div id="weekList">
+
+    <!-- Week 1 -->
+    <div class="weekItem">
+      <div class="weekHeader">
+        <span>韓国語文法</span>
+        <span class="progressText">0%</span>
+      </div>
+      <div class="fusenCount">文法数：0個</div>
+      <div class="progressBar"><div class="progressFill"></div></div>
+      <button class="weekBtn" data-week="1">開始する</button>
+    </div>
+
+<!-- ★ app.js を先に読み込む -->
+<script src="app.js"></script>
+
+<!-- ★ Part3 の文法数と進捗表示 -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const params = new URLSearchParams(window.location.search);
+  const part = 3; // ★固定（Part3専用画面）
+  const isReview = params.get("review") === "1";
+
+  const wordStatus = JSON.parse(localStorage.getItem("wordStatus") || "{}");
+  const wrongList = JSON.parse(localStorage.getItem("wrongWords") || "[]");
+
+  for (let i = 1; i <= 6; i++) {
+
+    let words = partWords[part][i];
+
+    let reviewWords = isReview
+      ? words.filter(w => wrongList.includes(w.en))
+      : words;
+
+    const fusenLabel = document.querySelector(`.weekItem:nth-child(${i}) .fusenCount`);
+    fusenLabel.textContent = `文法数：${reviewWords.length}個`;
+
+    if (reviewWords.length === 0) {
+      const label = document.querySelector(`.weekItem:nth-child(${i}) .progressText`);
+      const bar = document.querySelector(`.weekItem:nth-child(${i}) .progressFill`);
+      label.textContent = "0%";
+      bar.style.width = "0%";
+      continue;
+    }
+
+    let correct = 0;
+    reviewWords.forEach(w => {
+      if (wordStatus[w.en] === true) correct++;
+    });
+
+    const rate = Math.round((correct / reviewWords.length) * 100);
+
+    const label = document.querySelector(`.weekItem:nth-child(${i}) .progressText`);
+    label.textContent = `${rate}%`;
+
+    const bar = document.querySelector(`.weekItem:nth-child(${i}) .progressFill`);
+    bar.style.width = `${rate}%`;
+  }
+});
+</script>
+
+<!-- ★ Weekボタンの挙動 -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const part = 3; // ★固定（Part3専用）
+  const isReview = new URLSearchParams(window.location.search).get("review") === "1";
+
+  const weekButtons = document.querySelectorAll('.weekBtn');
+
+  weekButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const week = Number(btn.dataset.week);
+
+      if (part === 3 && isReview) {
+        const wrongList = JSON.parse(localStorage.getItem("wrongWords") || "[]");
+        const filtered = partWords[part][week].filter(w => wrongList.includes(w.en));
+
+        localStorage.setItem("reviewWords", JSON.stringify(filtered));
+
+        window.location.href = `index.html?part=${part}&week=${week}&review=1`;
+        return;
+      }
+
+      window.location.href = `index.html?part=${part}&week=${week}`;
+    });
+  });
+});
+</script>
+
+</body>
+</html>
